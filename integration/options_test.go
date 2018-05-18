@@ -29,10 +29,27 @@ func TestWriter(t *testing.T) {
 }
 
 func TestArgs(t *testing.T) {
-	// arguments are read from os
-	os.Args = []string{"cmd", "--pretty"}
-	flag.CommandLine = flag.NewFlagSet("name", 0)
 	var arguments args.DefaultArgumentList
+
+	os.Args = []string{"cmd", "--pretty"}
+	flag.CommandLine = flag.NewFlagSet("cmd", flag.ContinueOnError)
+
+	// capture output
+	var writer bytes.Buffer
+
+	i, err := New("integration", "7.0", Args(&arguments), Writer(&writer), InMemoryStore())
+	assert.NoError(t, err)
+
+	assert.NoError(t, i.Publish())
+
+	assert.Contains(t, writer.String(), "\n", "output should be prettified")
+}
+
+func TestArgsFromEnvVars(t *testing.T) {
+	var arguments args.DefaultArgumentList
+
+	os.Setenv("PRETTY", "true")
+	flag.CommandLine = flag.NewFlagSet("cmd", flag.ContinueOnError)
 
 	// capture output
 	var writer bytes.Buffer
