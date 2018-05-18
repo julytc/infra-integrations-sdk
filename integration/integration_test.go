@@ -2,14 +2,11 @@ package integration
 
 import (
 	"encoding/json"
-	"flag"
+	"io/ioutil"
 	"os"
 	"reflect"
 	"testing"
 
-	"io/ioutil"
-
-	sdk_args "github.com/newrelic/infra-integrations-sdk/args"
 	"github.com/newrelic/infra-integrations-sdk/data/event"
 	"github.com/newrelic/infra-integrations-sdk/data/metric"
 	"github.com/newrelic/infra-integrations-sdk/log"
@@ -73,60 +70,60 @@ func TestIntegration_DefaultEntity(t *testing.T) {
 	assert.Equal(t, e1, e2)
 }
 
-func TestDefaultArguments(t *testing.T) {
-	type argumentList struct {
-		sdk_args.DefaultArgumentList
-	}
-
-	var al argumentList
-	i, err := New("TestIntegration", "1.0", Logger(log.Discard), Writer(ioutil.Discard), Args(&al))
-	assert.NoError(t, err)
-
-	if i.Name != "TestIntegration" {
-		t.Error()
-	}
-	if i.IntegrationVersion != "1.0" {
-		t.Error()
-	}
-	if i.ProtocolVersion != "2" {
-		t.Error()
-	}
-	if len(i.Entities) != 0 {
-		t.Error()
-	}
-	if !al.All {
-		t.Error()
-	}
-	if al.Pretty {
-		t.Error()
-	}
-	if al.Verbose {
-		t.Error()
-	}
-}
-
-func TestCustomArguments(t *testing.T) {
-	type argumentList struct {
-		sdk_args.DefaultArgumentList
-	}
-
-	os.Args = []string{"cmd", "--pretty", "--verbose", "--all"}
-	flag.CommandLine = flag.NewFlagSet("name", 0)
-
-	var al argumentList
-	_, err := New("TestIntegration", "1.0", Logger(log.Discard), Writer(ioutil.Discard), Args(&al))
-	assert.NoError(t, err)
-
-	if !al.All {
-		t.Error()
-	}
-	if !al.Pretty {
-		t.Error()
-	}
-	if !al.Verbose {
-		t.Error()
-	}
-}
+//func TestDefaultArguments(t *testing.T) {
+//	type argumentList struct {
+//		sdk_args.DefaultArgumentList
+//	}
+//
+//	var al argumentList
+//	i, err := New("TestIntegration", "1.0", Logger(log.Discard), Writer(ioutil.Discard), Args(&al))
+//	assert.NoError(t, err)
+//
+//	if i.Name != "TestIntegration" {
+//		t.Error()
+//	}
+//	if i.IntegrationVersion != "1.0" {
+//		t.Error()
+//	}
+//	if i.ProtocolVersion != "2" {
+//		t.Error()
+//	}
+//	if len(i.Entities) != 0 {
+//		t.Error()
+//	}
+//	if !al.All {
+//		t.Error()
+//	}
+//	if al.Pretty {
+//		t.Error()
+//	}
+//	if al.Verbose {
+//		t.Error()
+//	}
+//}
+//
+//func TestCustomArguments(t *testing.T) {
+//	type argumentList struct {
+//		sdk_args.DefaultArgumentList
+//	}
+//
+//	os.Args = []string{"cmd", "--pretty", "--verbose", "--all"}
+//	flag.CommandLine = flag.NewFlagSet("name", 0)
+//
+//	var al argumentList
+//	_, err := New("TestIntegration", "1.0", Logger(log.Discard), Writer(ioutil.Discard), Args(&al))
+//	assert.NoError(t, err)
+//
+//	if !al.All {
+//		t.Error()
+//	}
+//	if !al.Pretty {
+//		t.Error()
+//	}
+//	if !al.Verbose {
+//		t.Error()
+//	}
+//}
 
 func TestIntegration_Publish(t *testing.T) {
 	w := testWriter{

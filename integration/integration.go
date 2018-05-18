@@ -4,10 +4,10 @@ import (
 	"bytes"
 	"encoding/json"
 	"errors"
+	"flag"
 	"fmt"
 	"io"
 	"os"
-	"reflect"
 	"sync"
 
 	"github.com/newrelic/infra-integrations-sdk/args"
@@ -28,7 +28,7 @@ type Integration struct {
 	prettyOutput       bool
 	writer             io.Writer
 	logger             log.Logger
-	args               interface{}
+	defaultArgs        bool
 }
 
 // New creates new integration with sane default values.
@@ -62,14 +62,11 @@ func New(name, version string, opts ...Option) (i *Integration, err error) {
 	}
 
 	// arguments
-	if err = i.checkArguments(); err != nil {
-		return
+	if i.defaultArgs {
+		args.LoadDefaultArgs()
+		i.prettyOutput = args.Pretty
 	}
-	if err = args.SetupArgs(i.args); err != nil {
-		return
-	}
-	defaultArgs := args.GetDefaultArgs(i.args)
-	i.prettyOutput = defaultArgs.Pretty
+	flag.Parse()
 
 	if i.storer == nil {
 		var err error
@@ -182,18 +179,4 @@ func (i *Integration) toJSON(pretty bool) (output []byte, err error) {
 	}
 
 	return buf.Bytes(), nil
-}
-
-func (i *Integration) checkArguments() error {
-	if i.args == nil {
-		i.args = new(struct{})
-		return nil
-	}
-	val := reflect.ValueOf(i.args)
-
-	if val.Kind() == reflect.Ptr && val.Elem().Kind() == reflect.Struct {
-		return nil
-	}
-
-	return errors.New("arguments must be a pointer to a struct (or nil)")
 }

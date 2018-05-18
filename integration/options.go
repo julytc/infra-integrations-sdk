@@ -61,10 +61,10 @@ func Synchronized() Option {
 	}
 }
 
-// Args sets the destination struct (pointer) where the command-line flags will be parsed to.
-func Args(a interface{}) Option {
+// DefaultArgs use default integration arguments form `args` package.
+func DefaultArgs() Option {
 	return func(i *Integration) error {
-		i.args = a
+		i.defaultArgs = true
 
 		return nil
 	}
